@@ -251,11 +251,26 @@
   //   }, {
   //     bla: "even more stuff"
   //   }); // obj1 now contains key1, key2, key3 and bla
-  _.extend = function(obj) {};
+  _.extend = function(obj) {
+    for (let i = 1; i < arguments.length; i++) {
+      Object.assign(obj, arguments[i]);
+    }
+    return obj;
+  };
 
   // Like extend, but doesn't ever overwrite a key that already
   // exists in obj
-  _.defaults = function(obj) {};
+  _.defaults = function(obj) {
+    if (JSON.stringify(obj) === "{}") {
+      Object.assign(obj, arguments[1]);
+    }
+    for (let i = 1; i < arguments.length; i++) {
+      for (let key2 in arguments[i]) {
+        if (!Object.keys(obj).includes(key2)) obj[key2] = arguments[i][key2];
+      }
+    }
+    return obj;
+  };
 
   /**
    * FUNCTIONS
@@ -296,7 +311,15 @@
   // _.memoize should return a function that, when called, will check if it has
   // already computed the result for the given argument and return that value
   // instead if possible.
-  _.memoize = function(func) {};
+  _.memoize = function(func) {
+    let cache = {};
+    return function() {
+      if (!Object.keys(cache).includes(JSON.stringify(arguments))) {
+        cache[JSON.stringify(arguments)] = func.apply(this, arguments);
+      }
+      return cache[JSON.stringify(arguments)];
+    };
+  };
 
   // Delays a function for the given number of milliseconds, and then calls
   // it with the arguments supplied.
@@ -304,7 +327,9 @@
   // The arguments for the original function are passed after the wait
   // parameter. For example _.delay(someFunction, 500, 'a', 'b') will
   // call someFunction('a', 'b') after 500ms
-  _.delay = function(func, wait) {};
+  _.delay = function(func, wait, ...args) {
+    setTimeout(func, wait, ...args);
+  };
 
   /**
    * ADVANCED COLLECTION OPERATIONS
@@ -316,7 +341,25 @@
   // TIP: This function's test suite will ask that you not modify the original
   // input array. For a tip on how to make a copy of an array, see:
   // http://mdn.io/Array.prototype.slice
-  _.shuffle = function(array) {};
+  _.shuffle = function(array) {
+    function generateRandomPosition() {
+      return Math.floor(Math.random() * array.length);
+    }
+
+    let randomPosition;
+    let cache = [];
+    let newArr = new Array(array.length);
+
+    for (let i = 0; i < newArr.length; i++) {
+      do {
+        randomPosition = generateRandomPosition();
+      } while (cache.includes(randomPosition));
+
+      cache.push(randomPosition);
+      newArr[i] = array[randomPosition];
+    }
+    return newArr;
+  };
 
   /**
    * ADVANCED
