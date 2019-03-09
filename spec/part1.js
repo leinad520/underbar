@@ -1,3 +1,4 @@
+// Daniel Kim
 (function() {
   "use strict";
 
